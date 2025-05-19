@@ -3,6 +3,7 @@ import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { ImageDownloader } from "@/components/ImageDownloader";
 import "./../app/app.css";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
@@ -42,6 +43,7 @@ export default function App() {
   return (
     <main>
             <h1>{user?.signInDetails?.loginId}'s todos</h1>
+            <ImageDownloader />
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (

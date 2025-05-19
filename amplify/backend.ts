@@ -1,10 +1,11 @@
 import { defineBackend } from '@aws-amplify/backend';
-import { auth } from './auth/resource.js';
-import { data } from './data/resource.js';
-import { storage } from './storage/resource';
+import { auth } from './auth/resource';
+import { data } from './data/resource'; // 👈 追加
+import { firstBucket, secondBucket } from './storage/resource';
 
 defineBackend({
-  storage,
   auth,
-  data,
+  data, // 👈 忘れずに追加
+  firstBucket,
+  secondBucket
 });
