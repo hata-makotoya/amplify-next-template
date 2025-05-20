@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
 import { downloadData } from 'aws-amplify/storage';
 
@@ -8,13 +9,19 @@ export function ImageDownloader() {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const { body } = await downloadData({
-          path: 'album/2024/1.jpg',
+        const task = downloadData({
+          path: 'protected/画像.png',
+          
           options: {
-            bucket: 'secondBucket', // Amplify defineStorage によって登録したバケット名
+            
+            bucket: {
+              bucketName: 'amplify-d6gvwhs3auvl2-main-bra-firstbucketb40a1e24-nfjg7nggrale',
+              region: 'ap-northeast-1',
+            },
           },
-        }).result;
+        });
 
+        const { body } = await task.result;
         const blob = await body.blob();
         setImageUrl(URL.createObjectURL(blob));
       } catch (error) {
