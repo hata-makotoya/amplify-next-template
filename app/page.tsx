@@ -62,61 +62,61 @@ export default function App() {
   }, []);
 
   async function handleAddPost() {
-  const { data, errors } = await client.mutations.addPost({
-    id: uuidv4(),
-    title: window.prompt("タイトルを入力") ?? "",
-    content: window.prompt("内容を入力") ?? "",
-    author: user?.signInDetails?.loginId ?? "anonymous",
-  });
+    const { data, errors } = await client.mutations.addPost({
+      id: uuidv4(),
+      title: window.prompt("タイトルを入力") ?? "",
+      content: window.prompt("内容を入力") ?? "",
+      author: user?.signInDetails?.loginId ?? "anonymous",
+    });
 
-  if (errors) console.error("投稿エラー:", errors);
-  else console.log("投稿成功:", data);
-}
+    if (errors) console.error("投稿エラー:", errors);
+    else console.log("投稿成功:", data);
+  }
 
-async function handleGetPost() {
-  const id = window.prompt("取得する投稿のID");
-  if (!id) return;
+  async function handleGetPost() {
+    const id = window.prompt("取得する投稿のID");
+    if (!id) return;
 
-  const { data, errors } = await client.queries.getPost({ id });
+    const { data, errors } = await client.queries.getPost({ id });
 
-  if (errors) console.error("取得エラー:", errors);
-  else console.log("取得成功:", data);
-}
+    if (errors) console.error("取得エラー:", errors);
+    else console.log("取得成功:", data);
+  }
 
-async function handleUpdatePost() {
-  const id = window.prompt("更新する投稿ID");
-  if (!id) return;
-  const title = window.prompt("新タイトル");
-  const content = window.prompt("新内容");
-  const versionStr = window.prompt("現在のバージョン番号");
-  if (!versionStr) return;
+  async function handleUpdatePost() {
+    const id = window.prompt("更新する投稿ID");
+    if (!id) return;
+    const title = window.prompt("新タイトル");
+    const content = window.prompt("新内容");
+    const versionStr = window.prompt("現在のバージョン番号");
+    if (!versionStr) return;
 
-  const expectedVersion = parseInt(versionStr);
-  const { data, errors } = await client.mutations.updatePost({
-    id,
-    title: title ?? undefined,
-    content: content ?? undefined,
-    expectedVersion,
-  });
+    const expectedVersion = parseInt(versionStr);
+    const { data, errors } = await client.mutations.updatePost({
+      id,
+      title: title ?? undefined,
+      content: content ?? undefined,
+      expectedVersion,
+    });
 
-  if (errors) console.error("更新エラー:", errors);
-  else console.log("更新成功:", data);
-}
+    if (errors) console.error("更新エラー:", errors);
+    else console.log("更新成功:", data);
+  }
 
-async function handleDeletePost() {
-  const id = window.prompt("削除する投稿ID");
-  if (!id) return;
-  const versionStr = window.prompt("バージョン（省略可）");
-  const expectedVersion = versionStr ? parseInt(versionStr) : undefined;
+  async function handleDeletePost() {
+    const id = window.prompt("削除する投稿ID");
+    if (!id) return;
+    const versionStr = window.prompt("バージョン（省略可）");
+    const expectedVersion = versionStr ? parseInt(versionStr) : undefined;
 
-  const { data, errors } = await client.mutations.deletePost({
-    id,
-    expectedVersion,
-  });
+    const { data, errors } = await client.mutations.deletePost({
+      id,
+      expectedVersion,
+    });
 
-  if (errors) console.error("削除エラー:", errors);
-  else console.log("削除成功:", data);
-}
+    if (errors) console.error("削除エラー:", errors);
+    else console.log("削除成功:", data);
+  }
 
 
   function createTodo() {
