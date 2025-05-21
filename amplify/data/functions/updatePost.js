@@ -1,3 +1,4 @@
+// data/functions/update.js
 import { util } from "@aws-appsync/utils";
 import * as ddb from "@aws-appsync/utils/dynamodb";
 
