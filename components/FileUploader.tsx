@@ -37,7 +37,7 @@ export default function FileUploaderWithProgress() {
             console.log('Upload success:', result.path);
             alert('アップロード完了！');
             setProgress(0); // 終了後リセット
-        } catch (error) {
+        } catch (error: any) {
             console.error('Upload error:', error);
             alert('アップロードに失敗しました: ${error?.message ?? error}');
         }

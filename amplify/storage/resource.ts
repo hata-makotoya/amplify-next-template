@@ -1,3 +1,4 @@
+// storage/resource.ts
 import { defineStorage } from '@aws-amplify/backend';
 
 export const firstBucket = defineStorage({

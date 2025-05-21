@@ -2,25 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { downloadData } from 'aws-amplify/storage';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
 export function ImageDownloader() {
+  const { user } = useAuthenticator();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const task = downloadData({
-          path: 'protected/画像.png',
-          
-          options: {
-            
-            bucket: {
-              bucketName: 'amplify-d6gvwhs3auvl2-main-bra-firstbucketb40a1e24-nfjg7nggrale',
-              region: 'ap-northeast-1',
-            },
-          },
-        });
-
+        const key = `protected/${user?.userId}/benjamin.png`; // ✅ identityIdに変更！
+        const task = downloadData({ path: key });
         const { body } = await task.result;
         const blob = await body.blob();
         setImageUrl(URL.createObjectURL(blob));
@@ -29,8 +21,10 @@ export function ImageDownloader() {
       }
     };
 
-    fetchImage();
-  }, []);
+    if (user?.userId) {
+      fetchImage();
+    }
+  }, [user?.userId]);
 
   if (!imageUrl) return <p>Loading image...</p>;
 

@@ -1,8 +1,8 @@
+// app/page.tsx
+
 "use client";
 
-//確認用
-// import { Auth } from 'aws-amplify';
-
+import { v4 as uuidv4 } from "uuid";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
@@ -27,12 +27,6 @@ export default function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
 
-//確認用 
-// useEffect(() => {
-//   Auth.currentCredentials().then((creds: { identityId: string }) => {
-//     console.log("Identity ID:", creds.identityId);
-//   });
-// }, []);
 
   function deleteTodo(id: string) {
     client.models.Todo.delete({ id })
@@ -47,6 +41,21 @@ export default function App() {
 
   useEffect(() => {
     listTodos();
+    // 投稿作成テスト
+    (async () => {
+      const { data, errors } = await client.mutations.addPost({
+        id: uuidv4(),
+        title: "Test Title",
+        content: "Test content",
+        author: user?.signInDetails?.loginId ?? "anonymous",
+      });
+
+      if (errors) {
+        console.error("GraphQL errors:", errors);
+      } else {
+        console.log("投稿成功:", data);
+      }
+    })();
   }, []);
 
   function createTodo() {
