@@ -30,7 +30,15 @@ export function ImageDownloader() {
   return (
     <div>
       <h2>Downloaded Image</h2>
-      <img src={imageUrl} alt="From S3" style={{ maxWidth: '100%' }} />
+      <img src={imageUrl} alt="From S3"
+        style={{
+          maxWidth: '100%',
+          maxHeight: '300px',  // ★ 高さ制限を追加
+          objectFit: 'contain', // ★ はみ出し対策に中身を収める
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+        }} />
     </div>
   );
 }
