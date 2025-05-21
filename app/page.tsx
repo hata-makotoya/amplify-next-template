@@ -84,24 +84,40 @@ export default function App() {
   }
 
   async function handleUpdatePost() {
-    const id = window.prompt("更新する投稿ID");
-    if (!id) return;
-    const title = window.prompt("新タイトル");
-    const content = window.prompt("新内容");
-    const versionStr = window.prompt("現在のバージョン番号");
-    if (!versionStr) return;
+  const id = window.prompt("更新する投稿ID");
+  if (!id) return;
 
-    const expectedVersion = parseInt(versionStr);
-    const { data, errors } = await client.mutations.updatePost({
-      id,
-      title: title ?? undefined,
-      content: content ?? undefined,
-      expectedVersion,
-    });
-
-    if (errors) console.error("更新エラー:", errors);
-    else console.log("更新成功:", data);
+  // ① 現在の投稿を取得
+  const getResult = await client.queries.getPost({ id });
+  if (getResult.errors || !getResult.data) {
+    console.error("取得エラー:", getResult.errors);
+    return;
   }
+
+  const currentPost = getResult.data;
+  const title = window.prompt("新しいタイトル", currentPost.title ?? "");
+  const content = window.prompt("新しい内容", currentPost.content ?? "");
+
+  // ② 現在のバージョンを使って更新
+
+  if (currentPost.version == null) {
+  alert("この投稿のバージョンが取得できません。");
+  return;
+}
+  const updateResult = await client.mutations.updatePost({
+    id,
+    title: title ?? undefined,
+    content: content ?? undefined,
+    expectedVersion: currentPost.version, // ← これがポイント！
+  });
+
+  if (updateResult.errors) {
+    console.error("更新エラー:", updateResult.errors);
+  } else {
+    console.log("更新成功:", updateResult.data);
+  }
+}
+
 
   async function handleDeletePost() {
     const id = window.prompt("削除する投稿ID");
