@@ -1,18 +1,19 @@
+// components/ImageDownloader.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { downloadData } from 'aws-amplify/storage';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 
 export function ImageDownloader() {
-  const { user } = useAuthenticator();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const key = `protected/${user?.userId}/benjamin.png`; // ✅ identityIdに変更！
-        const task = downloadData({ path: key });
+        const task = downloadData({
+          path: 'protected/benjamin.png',
+        });
+
         const { body } = await task.result;
         const blob = await body.blob();
         setImageUrl(URL.createObjectURL(blob));
@@ -21,10 +22,8 @@ export function ImageDownloader() {
       }
     };
 
-    if (user?.userId) {
-      fetchImage();
-    }
-  }, [user?.userId]);
+    fetchImage();
+  }, []);
 
   if (!imageUrl) return <p>Loading image...</p>;
 
