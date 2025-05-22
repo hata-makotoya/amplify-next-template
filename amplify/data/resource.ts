@@ -82,7 +82,8 @@ const schema = a.schema({
       })
     ),
 
-VisitRecord: a.customType({
+addVisitRecord: a.mutation()
+  .arguments({
     visitRecordId: a.string().required(),
     visitDate: a.string().required(),
     officeId: a.string().required(),
@@ -101,15 +102,13 @@ VisitRecord: a.customType({
     updatedAt: a.string(),
     updatedBy: a.string().required(),
     version: a.integer(),
-  }),
- // 例：登録用ミューテーション
-  addVisitRecord: a.mutation()
-    .arguments(a.ref("VisitRecord"))
-    .returns(a.ref("VisitRecord"))
-    .handler(a.handler.custom({
-      dataSource: "VisitRecordTableDataSource",
-      entry: "./functions/addVisitRecord.js"
-    })),
+  })
+  .returns(a.ref("VisitRecord"))
+  .handler(a.handler.custom({
+    dataSource: "VisitRecordTableDataSource",
+    entry: "./functions/addVisitRecord.js"
+  }))
+
 
 });
 
