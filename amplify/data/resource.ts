@@ -82,8 +82,8 @@ const schema = a.schema({
       })
     ),
 
-addVisitRecord: a.mutation()
-  .arguments({
+// VisitRecord 型（POSTのデータ構造）
+  VisitRecord: a.customType({
     visitRecordId: a.string().required(),
     visitDate: a.string().required(),
     officeId: a.string().required(),
@@ -102,14 +102,35 @@ addVisitRecord: a.mutation()
     updatedAt: a.string(),
     updatedBy: a.string().required(),
     version: a.integer(),
-  })
-  .returns(a.ref("VisitRecord"))
-  .handler(a.handler.custom({
-    dataSource: "VisitRecordTableDataSource",
-    entry: "./functions/addVisitRecord.js"
-  }))
+  }),
 
-
+  // ミューテーションの定義（データ登録用）
+  addVisitRecord: a.mutation()
+    .arguments({
+      visitRecordId: a.string().required(),
+      visitDate: a.string().required(),
+      officeId: a.string().required(),
+      childId: a.string().required(),
+      plannedArrivalTime: a.string(),
+      contractedDuration: a.integer(),
+      actualArrivalTime: a.string(),
+      actualLeaveTime: a.string(),
+      actualDuration: a.integer(),
+      lateReasonCode: a.string(),
+      earlyLeaveReasonCode: a.string(),
+      isManuallyEntered: a.boolean().required(),
+      isDeleted: a.boolean(),
+      createdAt: a.string(),
+      createdBy: a.string(),
+      updatedAt: a.string(),
+      updatedBy: a.string().required(),
+      version: a.integer(),
+    })
+    .returns(a.ref("VisitRecord"))
+    .handler(a.handler.custom({
+      dataSource: "VisitRecordTableDataSource",
+      entry: "./functions/addVisitRecord.js",
+    })),
 });
 
 export type Schema = ClientSchema<typeof schema>;
