@@ -35,9 +35,16 @@ export default function App() {
 
   function listTodos() {
     client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
+      next: (data) => {
+        if (!data?.items) return;
+        setTodos([...data.items]);
+      },
+      error: (err) => {
+        console.error("observeQuery エラー:", err);
+      },
     });
   }
+
 
 
 
@@ -84,40 +91,40 @@ export default function App() {
   }
 
   async function handleUpdatePost() {
-  const id = window.prompt("更新する投稿ID");
-  if (!id) return;
+    const id = window.prompt("更新する投稿ID");
+    if (!id) return;
 
-  // ① 現在の投稿を取得
-  const getResult = await client.queries.getPost({ id });
-  if (getResult.errors || !getResult.data) {
-    console.error("取得エラー:", getResult.errors);
-    return;
+    // ① 現在の投稿を取得
+    const getResult = await client.queries.getPost({ id });
+    if (getResult.errors || !getResult.data) {
+      console.error("取得エラー:", getResult.errors);
+      return;
+    }
+
+    const currentPost = getResult.data;
+    const title = window.prompt("新しいタイトル", currentPost.title ?? "");
+    const content = window.prompt("新しい内容", currentPost.content ?? "");
+
+    // ② 現在のバージョンを使って更新
+
+    if (currentPost.version == null) {
+      alert("この投稿のバージョンが取得できません。");
+      return;
+    }
+    const updateResult = await client.mutations.updatePost({
+      id,
+      title: title ?? undefined,
+      content: content ?? undefined,
+      expectedVersion: currentPost.version,
+      author: currentPost.author,
+    });
+
+    if (updateResult.errors) {
+      console.error("更新エラー:", updateResult.errors);
+    } else {
+      console.log("更新成功:", updateResult.data);
+    }
   }
-
-  const currentPost = getResult.data;
-  const title = window.prompt("新しいタイトル", currentPost.title ?? "");
-  const content = window.prompt("新しい内容", currentPost.content ?? "");
-
-  // ② 現在のバージョンを使って更新
-
-  if (currentPost.version == null) {
-  alert("この投稿のバージョンが取得できません。");
-  return;
-}
-  const updateResult = await client.mutations.updatePost({
-    id,
-    title: title ?? undefined,
-    content: content ?? undefined,
-    expectedVersion: currentPost.version,
-    author: currentPost.author, 
-  });
-
-  if (updateResult.errors) {
-    console.error("更新エラー:", updateResult.errors);
-  } else {
-    console.log("更新成功:", updateResult.data);
-  }
-}
 
 
   async function handleDeletePost() {
