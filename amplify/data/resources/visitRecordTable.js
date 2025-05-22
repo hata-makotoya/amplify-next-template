@@ -1,7 +1,7 @@
-// amplify/data/resources/visitRecordTable.ts
-import { connectTable } from '@aws-amplify/data';
+// amplify/data/resources/visitRecordTable.js
+const { connectTable } = require('@aws-amplify/data');
 
-export const VisitRecordTable = connectTable({
+exports.VisitRecordTableDataSource = connectTable({
     partitionKey: 'visitRecordId',
     fields: {
         visitRecordId: 'string',
