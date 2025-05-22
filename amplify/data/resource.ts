@@ -4,7 +4,7 @@ const schema = a.schema({
   // ✅ Todo 
   Todo: a.model({
     content: a.string(),
-  }).authorization(allow => [allow.owner(),allow.authenticated()]),
+  }).authorization(allow => [allow.owner(), allow.authenticated()]),
 
   // Post は外部テーブル
   Post: a.customType({
@@ -81,6 +81,28 @@ const schema = a.schema({
         entry: "./functions/deletePost.js",
       })
     ),
+
+  VisitRecord: a.customType({
+    visitRecordId: a.string().required(),
+    visitDate: a.string().required(),
+    officeId: a.string().required(),
+    childId: a.string().required(),
+    plannedArrivalTime: a.string(),
+    contractedDuration: a.integer(),
+    actualArrivalTime: a.string(),
+    actualLeaveTime: a.string(),
+    actualDuration: a.integer(),
+    lateReasonCode: a.string(),
+    earlyLeaveReasonCode: a.string(),
+    isManuallyEntered: a.boolean().required(),
+    isDeleted: a.boolean(),
+    createdAt: a.string(),
+    createdBy: a.string(),
+    updatedAt: a.string(),
+    updatedBy: a.string().required(),
+    version: a.integer(),
+  }),
+
 
   // ミューテーションの定義（データ登録用）
   // addVisitRecord: a.mutation()
