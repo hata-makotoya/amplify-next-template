@@ -4,7 +4,7 @@ const schema = a.schema({
   // ✅ Todo 
   Todo: a.model({
     content: a.string(),
-  }).authorization(allow => [allow.owner()]),
+  }).authorization(allow => [allow.owner(),allow.authenticated()]),
 
   // Post は外部テーブル
   Post: a.customType({
