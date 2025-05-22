@@ -33,17 +33,14 @@ export default function App() {
   }
 
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => {
-        if (!data?.items) return;
-        setTodos([...data.items]);
-      },
-      error: (err) => {
-        console.error("observeQuery エラー:", err);
-      },
-    });
+  async function listTodos() {
+  const { data, errors } = await client.models.Todo.list();
+  if (errors) {
+    console.error("取得エラー:", errors);
+    return;
   }
+  setTodos(data);
+}
 
 
 
