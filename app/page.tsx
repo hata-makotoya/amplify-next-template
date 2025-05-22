@@ -108,7 +108,8 @@ export default function App() {
     id,
     title: title ?? undefined,
     content: content ?? undefined,
-    expectedVersion: currentPost.version, // ← これがポイント！
+    expectedVersion: currentPost.version,
+    author: currentPost.author, 
   });
 
   if (updateResult.errors) {
