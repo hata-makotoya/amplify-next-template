@@ -1,144 +1,189 @@
-import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+//amplify/data/resource.ts
+import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
 
 const schema = a.schema({
-  // ✅ Todo 
-  Todo: a.model({
-    content: a.string(),
-  }).authorization(allow => [allow.owner(), allow.authenticated()]),
 
-  // Post は外部テーブル
-  Post: a.customType({
-    id: a.id().required(),
-    author: a.string().required(),
-    title: a.string(),
-    content: a.string(),
-    url: a.string(),
-    ups: a.integer(),
-    downs: a.integer(),
+
+
+  /**
+   * @typedef {object} Recipient
+   * @description 受給者情報を表すモデル
+   * @property {string} recipientId - 一意の受給者ID（主キー）
+   * @property {string} [officeId] - 所属事業所ID
+   * @property {boolean} [isDeleted] - 削除フラグ
+   * @property {Date} [createdAt] - 作成日時
+   * @property {string} [createdBy] - 作成者
+   * @property {Date} [updatedAt] - 更新日時
+   * @property {string} [updatedBy] - 更新者
+   * @property {number} [version] - バージョン管理用
+   */
+
+  Recipient: a.model({
+    recipientId: a.string().required(),
+    officeId: a.string(),
+    isDeleted: a.boolean(),
+    createdAt: a.datetime(),
+    createdBy: a.string(),
+    updatedAt: a.datetime(),
+    updatedBy: a.string(),
     version: a.integer(),
-  }),
-
-  // addPost(投稿追加)用のカスタムミューテーション
-
-  addPost: a.mutation()
-    .arguments({
-      id: a.id().required(),
-      author: a.string().required(),
-      title: a.string(),
-      content: a.string(),
-      url: a.string(),
-    })
-    .returns(a.ref("Post"))
-    .authorization(allow => [allow.publicApiKey()])
-    .handler(a.handler.custom({
-      dataSource: "ExternalPostTableDataSource",
-      entry: "./functions/addPost.js",
-    })),
+  })
+    .identifier(['recipientId'])
+    .authorization((allow) => [allow.publicApiKey()]),
 
 
-  // getPost(投稿取得)用のカスタムミューテーション
-  getPost: a
-    .query()
-    .arguments({ id: a.id().required() })
-    .returns(a.ref("Post"))
-    .authorization(allow => [allow.publicApiKey()])
-    .handler(
-      a.handler.custom({
-        dataSource: "ExternalPostTableDataSource",
-        entry: "./functions/getPost.js",
-      })
-    ),
+  /**
+     * @typedef {object} RecipientChild
+     * @description 受給者と児童の関係モデル
+     * @property {string} recipientId
+     * @property {string} childId
+     */
 
-  // updatePost(投稿更新)用のカスタムミューテーション
-  updatePost: a
-    .mutation()
-    .arguments({
-      id: a.id().required(),
-      author: a.string(),
-      title: a.string(),
-      content: a.string(),
-      url: a.string(),
-      expectedVersion: a.integer().required(),
-    })
-    .returns(a.ref("Post"))
-    .authorization(allow => [allow.publicApiKey()])
-    .handler(
-      a.handler.custom({
-        dataSource: "ExternalPostTableDataSource",
-        entry: "./functions/updatePost.js",
-      })
-    ),
+  RecipientChild: a.model({
+    recipientId: a.string(),
+    childId: a.string(),
+  })
+    .authorization((allow) => [allow.publicApiKey()]),
 
-  // deletePost(投稿削除)用のカスタムミューテーション
-  deletePost: a
-    .mutation()
-    .arguments({ id: a.id().required(), expectedVersion: a.integer() })
-    .returns(a.ref("Post"))
-    .authorization(allow => [allow.publicApiKey()])
-    .handler(
-      a.handler.custom({
-        dataSource: "ExternalPostTableDataSource",
-        entry: "./functions/deletePost.js",
-      })
-    ),
+  /**
+   * @typedef {object} User
+   * @description システム利用者（保護者等）の基本情報
+   */
 
-  VisitRecord: a.customType({
-    visitRecordId: a.string().required(),
-    visitDate: a.string().required(),
-    officeId: a.string().required(),
+  User: a.model({
+    userId: a.string().required(),
+    lastName: a.string().required(),
+    firstName: a.string().required(),
+    lastNameKana: a.string(),
+    firstNameKana: a.string(),
+    officeId: a.string(),
+    phoneNo: a.string(),
+    email: a.string(),
+    lineUserId: a.string(),
+    isEmailArrivalRequired: a.boolean(),
+  })
+    .identifier(['userId'])
+    .authorization((allow) => [allow.publicApiKey()]),
+
+  /**
+   * @typedef {object} Child
+   * @description 通所する児童の基本情報
+   */
+
+  Child: a.model({
+    childId: a.string().required(), // 主キー
+    lastName: a.string().required(),
+    firstName: a.string().required(),
+    lastNameKana: a.string(),
+    firstNameKana: a.string(),
+    dob: a.date(), // 生年月日
+    qrCodeName: a.string(), // QRコード出力用の識別名（画像ファイル名など）
+    isDeleted: a.boolean(),
+    createdAt: a.datetime(),
+    createdBy: a.string(),
+    updatedAt: a.datetime(),
+    updatedBy: a.string(),
+    version: a.integer(),
+  })
+    .identifier(["childId"])
+    .authorization((allow) => [allow.publicApiKey()]),
+
+  /**
+  * @typedef {object} ChildUser
+  * @description 児童とユーザーの関係を定義する中間テーブル
+  */
+
+  ChildUser: a.model({
     childId: a.string().required(),
-    plannedArrivalTime: a.string(),
+    userId: a.string().required(),
+    createdAt: a.datetime(),
+    createdBy: a.string(),
+    updatedAt: a.datetime(),
+    updatedBy: a.string(),
+  })
+    .identifier(['childId', 'userId']) // 複合主キーとして扱う場合
+    .authorization((allow) => [allow.publicApiKey()]),
+
+
+  /**
+  * @typedef {object} AuthInfo
+  * @description 認証情報を保持するモデル
+  */
+
+  AuthInfo: a.model({
+    staffId: a.string().required(), // 主キー
+    loginId: a.string().required(),
+    passwordHash: a.string().required(),
+    accountStatus: a.string().required(), // enum化も検討可
+    failedLoginAttempts: a.integer(),
+    lastLoginAt: a.datetime(),
+    passwordUpdatedAt: a.datetime(),
+    createdAt: a.datetime(),
+    createdBy: a.string(),
+    updatedAt: a.datetime(),
+    updatedBy: a.string(),
+  })
+    .identifier(['staffId'])
+    .authorization((allow) => [allow.publicApiKey()]),
+
+
+  /**
+   * @typedef {object} VisitRecord
+   * @description 通所実績データ。来所・退所情報などを保持。
+   */
+
+  VisitRecord: a.model({
+    visitDate: a.date(), // 旧: a.string()
+    officeId: a.string(),
+    childId: a.string(),
+    plannedArrivalTime: a.time(), // 旧: a.string()
     contractedDuration: a.integer(),
-    actualArrivalTime: a.string(),
-    actualLeaveTime: a.string(),
+
+    actualArrivalTime: a.time(), // 旧: a.string()
+    actualLeaveTime: a.time(),   // 旧: a.string()
     actualDuration: a.integer(),
+
     lateReasonCode: a.string(),
     earlyLeaveReasonCode: a.string(),
-    isManuallyEntered: a.boolean().required(),
+
+    isManuallyEntered: a.boolean(),
     isDeleted: a.boolean(),
-    createdAt: a.string(),
+
+    createdAt: a.datetime(),
     createdBy: a.string(),
-    updatedAt: a.string(),
-    updatedBy: a.string().required(),
+    updatedAt: a.datetime(),
+    updatedBy: a.string(),
+
     version: a.integer(),
-  }),
+    remarks: a.string(),
+  }).authorization((allow) => [allow.publicApiKey()]),
 
+  /**
+  * @typedef {object} CodeMaster
+  * @description 各種コード（理由コードなど）のマスターデータ
+  */
 
-  // ミューテーションの定義（データ登録用）
-  // addVisitRecord: a.mutation()
-  //   .arguments({
-  //     visitRecordId: a.string().required(),
-  //     visitDate: a.string().required(),
-  //     officeId: a.string().required(),
-  //     childId: a.string().required(),
-  //     plannedArrivalTime: a.string(),
-  //     contractedDuration: a.integer(),
-  //     actualArrivalTime: a.string(),
-  //     actualLeaveTime: a.string(),
-  //     actualDuration: a.integer(),
-  //     lateReasonCode: a.string(),
-  //     earlyLeaveReasonCode: a.string(),
-  //     isManuallyEntered: a.boolean().required(),
-  //     isDeleted: a.boolean(),
-  //     createdAt: a.string(),
-  //     createdBy: a.string(),
-  //     updatedAt: a.string(),
-  //     updatedBy: a.string().required(),
-  //     version: a.integer(),
-  //   })
-  //   .returns(a.ref("VisitRecord"))
-  //   .handler(a.handler.custom({
-  //     dataSource: "VisitRecordTableDataSource",
-  //     entry: "./functions/addVisitRecord.js",
-  //   })),
+  CodeMaster: a.model({
+    codeType: a.string().required(),
+    codeValue: a.string().required(),
+    codeTypeName: a.string(),
+    codeTypePhysical: a.string(),
+    displayText: a.string().required(),
+    shortText: a.string(),
+    extra: a.string(), // JSON形式などで保持
+    description: a.string(),
+  })
+    .identifier(['codeType', 'codeValue']) // 複合キーで識別
+    .authorization((allow) => [allow.publicApiKey()]),
 });
+
 
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "apiKey",
+    defaultAuthorizationMode: 'apiKey',
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },
